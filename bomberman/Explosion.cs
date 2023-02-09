@@ -20,10 +20,10 @@ namespace bomberman
             this.boxExplosion.Tag = "explosion";
         }
 
+        //生成
         public void Spawn(int posX, int posY)
         {
-            this.boxExplosion.Location = new Point(posX, posY);
-            //this.boxExplosion.BringToFront();
+            this.boxExplosion.Location = new Point(posX, posY); //移動爆炸到生成位置
         }
     }
 }

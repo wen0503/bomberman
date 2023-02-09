@@ -18,6 +18,7 @@ namespace bomberman
             this.boxBlock.SendToBack();     //將場景方塊移至圖層最下方
         }
 
+        //生成
         public void Spawn(string type, int posX, int posY)
         {
             switch (type)  //從level1文字檔中讀取的字來判斷牆(W)或路(N)
@@ -41,7 +42,7 @@ namespace bomberman
                     Console.Error.WriteLine("Level Text File Error!");
                     break;
             }
-            this.boxBlock.Location = new Point(posX, posY);  //設定方塊位置
+            this.boxBlock.Location = new Point(posX, posY);  //移動方塊到生成位置
         }
     }
 }
