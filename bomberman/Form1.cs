@@ -11,7 +11,7 @@ namespace bomberman
 {
     public partial class Form1 : System.Windows.Forms.Form
     {
-        public const int MAP_SIZE = 11;        
+        public const int MAP_SIZE = 11;     //地圖大小
 
         int[,] obstacal = new int[MAP_SIZE, MAP_SIZE];  //紀錄地圖中的障礙物        
 
@@ -32,7 +32,6 @@ namespace bomberman
         int point = 0;  //分數
 
         bool start = false;             //遊戲開始狀態(是否已開始)
-        //bool finish = true;             //AI走完完整一格的狀態(是否走完一格)
 
         //Computer ENTER_GAME = new Computer();  //遊戲進入音樂
         Computer explode_wav = new Computer();  //遊戲內部音樂
@@ -46,7 +45,7 @@ namespace bomberman
         {
             this.KeyPreview = true;
 
-            this.Size = new Size(1250, 830);
+            this.Size = new Size(1250, 830);        //設定視窗大小
 
             this.Controls.Add(player.boxCreature);  //新增玩家
             this.Controls.Add(ai.boxCreature);      //新增AI
@@ -63,19 +62,21 @@ namespace bomberman
             }
 
             Init();
-            LabStartup.Visible = true;           
+            LabStartup.Visible = true;
         }
 
+        //遊戲開始
         private void StartGame()
         {
             start = true;   //將遊戲狀態設為"開始"
-            Init();
+            Init();         //初始化
             MapLoader(1);   //讀取地圖資訊(Level1.txt)
-            timeMain.Start();
-            timeAI.Start();
-            LabPoint.Visible = true;
+            timeMain.Start();   //開始"主Timer"
+            timeAI.Start();     //開始"AITimer"
+            LabPoint.Visible = true;    //顯示分數label
         }
 
+        //初始化
         private void Init()
         {
             //隱藏所有Label
@@ -123,7 +124,8 @@ namespace bomberman
             }
         }
 
-        private void GameOver()//遊戲結束
+        //遊戲結束
+        private void GameOver()
         {
             start = false; //將遊戲狀態設為"未開始"
 
@@ -135,16 +137,20 @@ namespace bomberman
             timeExplosion_AI.Stop();
             timeExplosion_Player.Stop();
 
-            foreach (Control control in this.Controls)  //將所有controls影藏
+            //將所有controls影藏
+            foreach (Control control in this.Controls)  
             {
                 control.Visible = false;
             }
 
+            //顯示所需label
+            LabPoint.Visible = true;
             LabGameover.Visible = true;
             LabStartup.Visible = true;           
         }
 
-        private void MapLoader(int level) //讀取關卡
+        //讀取關卡
+        private void MapLoader(int level) 
         {
             int spawnX = 0, spawnY = 0; //初始玩家生成座標
 
@@ -174,7 +180,7 @@ namespace bomberman
             using (StringReader reader = new StringReader(strLevel))
             {
                 int posX = 0, posY = 0; //初始方塊的位置
-                int i = 0, j = 0;
+                int i = 0, j = 0;       //初始索引值
 
                 string strings = string.Empty;
                 while ((strings = reader.ReadLine()) != null)    //讀取level1文字檔中的文字
@@ -184,23 +190,23 @@ namespace bomberman
                     foreach (string type in blocks)
                     {
                         Block block = new Block();
-                        block.Spawn(type, posX, posY);      //每讀取一字元就建立一個新button(場景方塊)
-                        if(type == "N")
+                        block.Spawn(type, posX, posY);      //每讀取一字元就建立一個新button(場景方塊)                        
+                        this.Controls.Add(block.boxBlock);  //放置方塊
+                        posX += Block.BlockWidth;   //向右位移一個方塊寬
+
+                        if (type == "N")    //如果為草地方塊
                         {
-                            obstacal[i,j] = 0;
+                            obstacal[i, j] = 0; //視為非障礙物
                         }
                         else
                         {
-                            obstacal[i,j] = 1;
+                            obstacal[i, j] = 1; //視為障礙物
                         }
-
-                        this.Controls.Add(block.boxBlock);  //放置方塊
-
-                        posX += Block.BlockWidth;   //向右位移一個方塊寬
                         j++;
                     }
                     posX = 0;                   //回到初始位置(換行)
                     posY += Block.BlockHeight;   //向下位移一個方塊高
+
                     j = 0;
                     i++;
                 }
@@ -212,7 +218,8 @@ namespace bomberman
             Keys input;
             input = e.KeyCode;
 
-            if (input == Keys.Enter && start == false)   //當玩家按下ENTER遊戲開始
+            //當玩家按下ENTER遊戲開始
+            if (input == Keys.Enter && start == false)
             {
                 StartGame();
             }
@@ -222,15 +229,13 @@ namespace bomberman
                 player.hitbox.Left = player.boxCreature.Left;  //先將hitbox移至玩家位置
                 player.hitbox.Top = player.boxCreature.Top;
 
-                int pX = player.boxCreature.Left / Block.BlockWidth;
-                int pY = player.boxCreature.Top / Block.BlockHeight;
-
                 switch (input)
                 {
                     //放炸彈
                     case Keys.Space:
                         if (!player.BombPlaced)
                         {
+                            //放置炸彈
                             PlaceBomb(player.boxCreature.Left, player.boxCreature.Top, timeBomb_Player, "player", PlayerBomb);
                         }
                         break;
@@ -266,7 +271,7 @@ namespace bomberman
         }
 
         //碰撞檢測(判斷兩物是否重疊)
-        public bool CollisionCheck(PictureBox box, string tag)//判斷是否碰撞到牆壁
+        public bool CollisionCheck(PictureBox box, string tag)
         {
             //列舉出form中所有Tag為tag的所有Picturebox
             foreach (PictureBox picturebox in
@@ -290,10 +295,10 @@ namespace bomberman
             switch (type)   //判斷是誰放的炸彈
             {
                 case "player":
-                    player.BombPlaced = true;
-                    player.OnBomb = true;
-                    Player_duration = Explosion.duration;
-                    Player_fuze = Bomb.fuze;
+                    player.BombPlaced = true;               //設定玩家狀態為"已放置炸彈"
+                    player.OnBomb = true;                   //設定玩家狀態為"在炸彈上"
+                    Player_duration = Explosion.duration;   //初始爆炸持續時間
+                    Player_fuze = Bomb.fuze;                //初始炸彈引信
                     break;
 
                 case "AI":
@@ -308,8 +313,8 @@ namespace bomberman
             }
 
             bomb.Spawn(posX, posY); //生成炸彈(移動炸彈)
-            //System.Diagnostics.Debug.WriteLine("bombX = " + bomb.bombX + ", bombY = " + bomb.bombY);
 
+            //將炸彈所在處設為障礙物(炸彈會擋路)
             obstacal[bomb.bombY / Block.BlockHeight, bomb.bombX / Block.BlockWidth] = 1;
 
             timer.Start();  //開始炸彈的Timer
@@ -337,6 +342,7 @@ namespace bomberman
                 }
             }
 
+            //移除障礙物(炸彈爆炸後就不再是障礙物)
             obstacal[bomb.bombY / Block.BlockHeight, bomb.bombX / Block.BlockWidth] = 0;
 
             timer.Start();  //開始爆炸的Timer
@@ -369,7 +375,7 @@ namespace bomberman
                         ai.ChoosePlace();  //選擇重生地
                     }
 
-                    ai.step = Block.BlockHeight / ai.Speed;        //重置步數
+                    ai.step = Block.BlockHeight / ai.Speed;     //重置步數
                     ai.Spawn(ai.hitbox.Left, ai.hitbox.Top);    //生成AI
                 }
             }
@@ -401,12 +407,15 @@ namespace bomberman
             {
                 if (CollisionCheck(picturebox, "explosion"))  //判斷泥土是否被炸到
                 {
+                    //將炸彈座標轉換成索引值
                     int pX = picturebox.Left / Block.BlockWidth;
                     int pY = picturebox.Top / Block.BlockHeight;
 
                     //將泥土替換為草地
                     picturebox.Image = Properties.Resources.grass;
                     picturebox.Tag = "grass";
+
+                    //移除障礙物(泥土被破壞後就不再是障礙物)
                     obstacal[pY, pX] = 0;
                 }
             }
@@ -415,13 +424,13 @@ namespace bomberman
         private void timeBomb_Player_Tick(object sender, EventArgs e)
         {
             Player_fuze--;
-            System.Diagnostics.Debug.WriteLine("Player_fuze = " + Player_fuze);
             if (Player_fuze <= 0)
             {
                 timeBomb_Player.Stop();
-                //執行爆炸
+                
                 if (start == true)
                 {
+                    //執行爆炸
                     Explode(Player_explosions, timeExplosion_Player, PlayerBomb);                    
                 }
             }
@@ -430,10 +439,10 @@ namespace bomberman
         private void timeExplosion_Player_Tick(object sender, EventArgs e)
         {
             Player_duration--;
-            System.Diagnostics.Debug.WriteLine("Player_duration = " + Player_duration);
             if (Player_duration <= 0)
             {
                 timeExplosion_Player.Stop();
+
                 for (int i = 0; i < 5; i++)
                 {
                     //隱藏玩家炸彈並移至角落
@@ -449,13 +458,13 @@ namespace bomberman
         private void timeBomb_AI_Tick(object sender, EventArgs e)
         {
             AI_fuze--;
-            System.Diagnostics.Debug.WriteLine("AI_fuze = " + AI_fuze);
             if (AI_fuze <= 0)
             {
                 timeBomb_AI.Stop();
-                //執行爆炸
+                
                 if (start == true)
                 {
+                    //執行爆炸
                     Explode(AI_explosions, timeExplosion_AI, AIBomb);
                 }
             }
@@ -464,10 +473,10 @@ namespace bomberman
         private void timeExplosion_AI_Tick(object sender, EventArgs e)
         {
             AI_duration--;
-            System.Diagnostics.Debug.WriteLine("AIduration = " + AI_duration);
             if (AI_duration <= 0)
             {
                 timeExplosion_AI.Stop();
+
                 for (int i = 0; i < 5; i++)
                 {
                     //隱藏AI炸彈並移至角落
@@ -486,7 +495,7 @@ namespace bomberman
             {
                 ai.step = 0;        //步數歸零
 
-                if (!ai.BombPlaced)  //判斷AI是否已放過炸彈(場上是否存在AI的炸彈),避免重複投彈
+                if (!ai.BombPlaced) //判斷AI是否已放過炸彈(場上是否存在AI的炸彈),避免重複投彈
                 {
                     Random random = new Random();
 
@@ -498,6 +507,7 @@ namespace bomberman
                     }
                 }
 
+                //選擇方向
                 ai.ChooseWay(player.boxCreature.Left, player.boxCreature.Top, obstacal);
             }
             else
