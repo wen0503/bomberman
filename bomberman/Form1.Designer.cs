@@ -95,7 +95,7 @@
             // 
             this.LabPoint.AutoSize = true;
             this.LabPoint.Font = new System.Drawing.Font("Microsoft JhengHei UI", 30F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.LabPoint.Location = new System.Drawing.Point(701, 128);
+            this.LabPoint.Location = new System.Drawing.Point(843, 127);
             this.LabPoint.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.LabPoint.Name = "LabPoint";
             this.LabPoint.Size = new System.Drawing.Size(256, 50);
