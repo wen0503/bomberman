@@ -12,6 +12,10 @@ namespace bomberman
     {
         public const int CreatureHeight = 70, CreatureWidth = 70;
         public int Speed;   //生物移動速度
+
+        public bool OnBomb = false;
+        public bool BombPlaced = false; //是否已放下炸彈(場上是否已存在玩家的炸彈)
+
         public PictureBox boxCreature = new PictureBox();
         public PictureBox hitbox = new PictureBox();
 
