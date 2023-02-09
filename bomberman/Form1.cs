@@ -242,7 +242,7 @@ namespace bomberman
 
                     //移動
                     case Keys.W:
-                        player.hitbox.Top -= player.Speed; //先讓hitbox移動
+                        player.hitbox.Top -= player.Speed; //先讓hitbox移動                       
                         player.boxCreature.Image= Properties.Resources.player_up;
                         break;
 
