@@ -80,12 +80,22 @@ namespace bomberman
         {
             StartGame();
             MapLoader(1);   //讀取地圖資訊(Level1.txt)
+            //啟用所有Timer
+            timeMain.Start();
+            timeAI.Start();
+            timeBomb.Start();
+            timeExplosion.Start();
         }
 
         private void butLevel2_Click(object sender, EventArgs e)
         {
             StartGame();
             MapLoader(2);   //讀取地圖資訊(Level2.txt)
+            //啟用所有Timer
+            timeMain.Start();
+            timeAI.Start();
+            timeBomb.Start();
+            timeExplosion.Start();
         }
 
         //遊戲開始
@@ -97,7 +107,7 @@ namespace bomberman
 
         //初始化
         private void Init()
-        {           
+        {
             //隱藏所有Label
             LabStartup.Visible = false;
             LabGameover.Visible = false;
@@ -151,12 +161,6 @@ namespace bomberman
                     control.Dispose();
                 }
             }
-
-            //啟用所有Timer
-            timeMain.Start();
-            timeAI.Start();
-            timeBomb.Start();
-            timeExplosion.Start();
 
             point = 0;                  //重置分數
             LabPoint.Visible = true;    //顯示分數label
