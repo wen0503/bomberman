@@ -74,7 +74,7 @@ namespace bomberman
         }
 
         //選方向
-        public void ChooseWay(int pX, int pY, int[,] obstacal)
+        public void ChooseWay(int pX, int pY, int[,] obstacle)
         {
             //將AI座標轉換為索引值
             int aiX = this.boxCreature.Left / Block.BlockWidth;
@@ -102,7 +102,7 @@ namespace bomberman
                 this.visited[aiY, aiX] = 1; //紀錄AI當前座標為"已走過"
 
                 //執行DFS演算法
-                dfs(obstacal, this.visited, aiX, aiY, pX, pY, 0);
+                dfs(obstacle, this.visited, aiX, aiY, pX, pY, 0);
 
                 //當無法抵達玩家位置
                 if (!this.HaveWay)

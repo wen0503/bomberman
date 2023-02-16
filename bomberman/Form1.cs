@@ -13,7 +13,7 @@ namespace bomberman
     {
         public const int MAP_SIZE = 11;     //地圖大小
 
-        int[,] obstacal = new int[MAP_SIZE, MAP_SIZE];  //紀錄地圖中的障礙物        
+        int[,] obstacle = new int[MAP_SIZE, MAP_SIZE];  //紀錄地圖中的障礙物        
 
         List<Explosion> Player_explosions = new List<Explosion>();  //爆炸的陣列(存放所有玩家的Explosion)
         List<Explosion> AI_explosions = new List<Explosion>();      //爆炸的陣列(存放所有AI的Explosion)
@@ -196,11 +196,11 @@ namespace bomberman
 
                         if (type == "N")    //如果為草地方塊
                         {
-                            obstacal[i, j] = 0; //視為非障礙物
+                            obstacle[i, j] = 0; //視為非障礙物
                         }
                         else
                         {
-                            obstacal[i, j] = 1; //視為障礙物
+                            obstacle[i, j] = 1; //視為障礙物
                         }
                         j++;
                     }
@@ -319,7 +319,7 @@ namespace bomberman
             bomb.Spawn(posX, posY); //生成炸彈(移動炸彈)
 
             //將炸彈所在處設為障礙物(炸彈會擋路)
-            obstacal[bomb.bombY / Block.BlockHeight, bomb.bombX / Block.BlockWidth] = 1;
+            obstacle[bomb.bombY / Block.BlockHeight, bomb.bombX / Block.BlockWidth] = 1;
 
             timer.Start();  //開始炸彈的Timer
         }
@@ -347,7 +347,7 @@ namespace bomberman
             }
 
             //移除障礙物(炸彈爆炸後就不再是障礙物)
-            obstacal[bomb.bombY / Block.BlockHeight, bomb.bombX / Block.BlockWidth] = 0;
+            obstacle[bomb.bombY / Block.BlockHeight, bomb.bombX / Block.BlockWidth] = 0;
 
             timer.Start();  //開始爆炸的Timer
         }
@@ -420,7 +420,7 @@ namespace bomberman
                     picturebox.Tag = "grass";
 
                     //移除障礙物(泥土被破壞後就不再是障礙物)
-                    obstacal[pY, pX] = 0;
+                    obstacle[pY, pX] = 0;
                 }
             }
         }
@@ -512,7 +512,7 @@ namespace bomberman
                 }
 
                 //選擇方向
-                ai.ChooseWay(player.boxCreature.Left, player.boxCreature.Top, obstacal);
+                ai.ChooseWay(player.boxCreature.Left, player.boxCreature.Top, obstacle);
             }
             else
             {
