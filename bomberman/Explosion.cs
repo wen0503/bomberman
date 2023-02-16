@@ -11,7 +11,6 @@ namespace bomberman
     {
         public const int ExplosionHeight = 70, ExplosionWidth = 70;
         public PictureBox boxExplosion = new PictureBox();
-        public const int duration = 1;    //爆炸持續時間
 
         public Explosion()
         {

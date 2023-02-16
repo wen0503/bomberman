@@ -19,13 +19,32 @@ namespace bomberman
         private int min = INF;  //AI的最少步數
         private int way = 4;    //AI走的方向
         public int step;        //AI走的步數
-        public int place = 0;   //AI是否放炸彈
+        public int place = 0;   //AI是否要放炸彈
+        public int target = 0;  //AI目標(索引值)
 
         private bool HaveWay = false;   //AI是否可以抵達目的地
 
-        public AI() : base(Properties.Resources.AI, 10)
+        public AI(string type) : base(10)
         {
             this.boxCreature.Tag = "AI";
+            switch (type) 
+            {
+                case "green":
+                    this.boxCreature.Image = Properties.Resources.AI_green;   //設定AI圖案
+                    break;
+
+                case "red":
+                    this.boxCreature.Image = Properties.Resources.AI_red;
+                    break;
+
+                case "yellow":
+                    this.boxCreature.Image = Properties.Resources.AI_yellow;
+                    break;
+
+                default:
+                    break;
+            }
+
         }
 
         //移動

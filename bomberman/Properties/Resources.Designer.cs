@@ -63,9 +63,29 @@ namespace bomberman.Properties {
         /// <summary>
         ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
         /// </summary>
-        internal static System.Drawing.Bitmap AI {
+        internal static System.Drawing.Bitmap AI_green {
             get {
-                object obj = ResourceManager.GetObject("AI", resourceCulture);
+                object obj = ResourceManager.GetObject("AI_green", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
+        /// </summary>
+        internal static System.Drawing.Bitmap AI_red {
+            get {
+                object obj = ResourceManager.GetObject("AI_red", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
+        /// </summary>
+        internal static System.Drawing.Bitmap AI_yellow {
+            get {
+                object obj = ResourceManager.GetObject("AI_yellow", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -135,6 +155,25 @@ namespace bomberman.Properties {
         internal static string level1 {
             get {
                 return ResourceManager.GetString("level1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 W W W W W W W W W W W
+        ///W N N N D N N N N N W
+        ///W N W D W N W D W N W
+        ///W N N N N N N N D N W
+        ///W D W D W D W D W N W
+        ///W D N N N N N N N N W
+        ///W N W D W N W D W D W
+        ///W N D N D N N N N N W
+        ///W D W N W D W N W N W
+        ///W N N N N N N N D N W
+        ///W W W W W W W W W W W 的當地語系化字串。
+        /// </summary>
+        internal static string level2 {
+            get {
+                return ResourceManager.GetString("level2", resourceCulture);
             }
         }
         

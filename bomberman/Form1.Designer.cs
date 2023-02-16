@@ -32,12 +32,12 @@
             this.timeMain = new System.Windows.Forms.Timer(this.components);
             this.LabStartup = new System.Windows.Forms.Label();
             this.timeAI = new System.Windows.Forms.Timer(this.components);
-            this.timeExplosion_Player = new System.Windows.Forms.Timer(this.components);
-            this.timeBomb_Player = new System.Windows.Forms.Timer(this.components);
-            this.timeBomb_AI = new System.Windows.Forms.Timer(this.components);
-            this.timeExplosion_AI = new System.Windows.Forms.Timer(this.components);
+            this.timeExplosion = new System.Windows.Forms.Timer(this.components);
+            this.timeBomb = new System.Windows.Forms.Timer(this.components);
             this.LabGameover = new System.Windows.Forms.Label();
             this.LabPoint = new System.Windows.Forms.Label();
+            this.butLevel1 = new System.Windows.Forms.Button();
+            this.butLevel2 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // timeMain
@@ -48,45 +48,33 @@
             // 
             this.LabStartup.AutoSize = true;
             this.LabStartup.Font = new System.Drawing.Font("Microsoft JhengHei UI", 30F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.LabStartup.Location = new System.Drawing.Point(207, 415);
-            this.LabStartup.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.LabStartup.Location = new System.Drawing.Point(240, 229);
             this.LabStartup.Name = "LabStartup";
-            this.LabStartup.Size = new System.Drawing.Size(399, 50);
+            this.LabStartup.Size = new System.Drawing.Size(534, 64);
             this.LabStartup.TabIndex = 0;
-            this.LabStartup.Text = "Press ENTER to start";
+            this.LabStartup.Text = "Please select the level";
             // 
             // timeAI
             // 
             this.timeAI.Tick += new System.EventHandler(this.timeAI_Tick);
             // 
-            // timeExplosion_Player
+            // timeExplosion
             // 
-            this.timeExplosion_Player.Interval = 1000;
-            this.timeExplosion_Player.Tick += new System.EventHandler(this.timeExplosion_Player_Tick);
+            this.timeExplosion.Interval = 1000;
+            this.timeExplosion.Tick += new System.EventHandler(this.timeExplosion_Tick);
             // 
-            // timeBomb_Player
+            // timeBomb
             // 
-            this.timeBomb_Player.Interval = 1000;
-            this.timeBomb_Player.Tick += new System.EventHandler(this.timeBomb_Player_Tick);
-            // 
-            // timeBomb_AI
-            // 
-            this.timeBomb_AI.Interval = 1000;
-            this.timeBomb_AI.Tick += new System.EventHandler(this.timeBomb_AI_Tick);
-            // 
-            // timeExplosion_AI
-            // 
-            this.timeExplosion_AI.Interval = 1000;
-            this.timeExplosion_AI.Tick += new System.EventHandler(this.timeExplosion_AI_Tick);
+            this.timeBomb.Interval = 1000;
+            this.timeBomb.Tick += new System.EventHandler(this.timeBomb_Tick);
             // 
             // LabGameover
             // 
             this.LabGameover.AutoSize = true;
             this.LabGameover.Font = new System.Drawing.Font("Microsoft JhengHei UI", 30F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.LabGameover.Location = new System.Drawing.Point(276, 273);
-            this.LabGameover.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.LabGameover.Location = new System.Drawing.Point(355, 346);
             this.LabGameover.Name = "LabGameover";
-            this.LabGameover.Size = new System.Drawing.Size(236, 50);
+            this.LabGameover.Size = new System.Drawing.Size(292, 64);
             this.LabGameover.TabIndex = 1;
             this.LabGameover.Text = "Game Over";
             this.LabGameover.Visible = false;
@@ -95,22 +83,44 @@
             // 
             this.LabPoint.AutoSize = true;
             this.LabPoint.Font = new System.Drawing.Font("Microsoft JhengHei UI", 30F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.LabPoint.Location = new System.Drawing.Point(843, 127);
-            this.LabPoint.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.LabPoint.Location = new System.Drawing.Point(1084, 161);
             this.LabPoint.Name = "LabPoint";
-            this.LabPoint.Size = new System.Drawing.Size(256, 50);
+            this.LabPoint.Size = new System.Drawing.Size(324, 64);
             this.LabPoint.TabIndex = 3;
             this.LabPoint.Text = "Your points :";
             // 
+            // butLevel1
+            // 
+            this.butLevel1.Font = new System.Drawing.Font("Microsoft JhengHei UI", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.butLevel1.Location = new System.Drawing.Point(280, 468);
+            this.butLevel1.Name = "butLevel1";
+            this.butLevel1.Size = new System.Drawing.Size(150, 50);
+            this.butLevel1.TabIndex = 4;
+            this.butLevel1.Text = "Level1";
+            this.butLevel1.UseVisualStyleBackColor = true;
+            this.butLevel1.Click += new System.EventHandler(this.butLevel1_Click);
+            // 
+            // butLevel2
+            // 
+            this.butLevel2.Font = new System.Drawing.Font("Microsoft JhengHei UI", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.butLevel2.Location = new System.Drawing.Point(554, 468);
+            this.butLevel2.Name = "butLevel2";
+            this.butLevel2.Size = new System.Drawing.Size(150, 50);
+            this.butLevel2.TabIndex = 5;
+            this.butLevel2.Text = "Level2";
+            this.butLevel2.UseVisualStyleBackColor = true;
+            this.butLevel2.Click += new System.EventHandler(this.butLevel2_Click);
+            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1234, 791);
+            this.ClientSize = new System.Drawing.Size(1587, 1002);
+            this.Controls.Add(this.butLevel2);
+            this.Controls.Add(this.butLevel1);
             this.Controls.Add(this.LabPoint);
             this.Controls.Add(this.LabGameover);
             this.Controls.Add(this.LabStartup);
-            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "Bomberman";
             this.Load += new System.EventHandler(this.Bomberman_Load);
@@ -125,11 +135,11 @@
         private System.Windows.Forms.Timer timeMain;
         private Label LabStartup;
         private System.Windows.Forms.Timer timeAI;
-        private System.Windows.Forms.Timer timeExplosion_Player;
-        private System.Windows.Forms.Timer timeBomb_Player;
-        private System.Windows.Forms.Timer timeBomb_AI;
-        private System.Windows.Forms.Timer timeExplosion_AI;
+        private System.Windows.Forms.Timer timeExplosion;
+        private System.Windows.Forms.Timer timeBomb;
         private Label LabGameover;
         private Label LabPoint;
+        private Button butLevel1;
+        private Button butLevel2;
     }
 }
