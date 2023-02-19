@@ -1,212 +1,276 @@
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Timers;
-using Microsoft.VisualBasic;//¤Ş¥Îmicrosoft.visualbasic©R¦WªÅ¶¡
-using Microsoft.VisualBasic.Devices;//¤Ş¥Îmicrosoft.visualbasic.devices©R¦WªÅ¶¡
+using Microsoft.VisualBasic;//å¼•ç”¨microsoft.visualbasicå‘½åç©ºé–“
+using Microsoft.VisualBasic.Devices;//å¼•ç”¨microsoft.visualbasic.deviceså‘½åç©ºé–“
 using System.Runtime.Intrinsics.X86;
 using System;
 using System.Diagnostics;
+using System.Numerics;
+using System.Threading;
 
 namespace bomberman
 {
     public partial class Form1 : System.Windows.Forms.Form
     {
-        public const int MAP_SIZE = 11;     //¦a¹Ï¤j¤p
+        public const int MAP_SIZE = 11;     //åœ°åœ–å¤§å°
 
-        int[,] obstacle = new int[MAP_SIZE, MAP_SIZE];  //¬ö¿ı¦a¹Ï¤¤ªº»ÙÃªª«        
+        int[,] obstacle = new int[MAP_SIZE, MAP_SIZE];  //ç´€éŒ„åœ°åœ–ä¸­çš„éšœç¤™ç‰©        
 
-        List<Explosion> Player_explosions = new List<Explosion>();  //Ãz¬µªº°}¦C(¦s©ñ©Ò¦³ª±®aªºExplosion)
-        List<Explosion> AI_explosions = new List<Explosion>();      //Ãz¬µªº°}¦C(¦s©ñ©Ò¦³AIªºExplosion)
+        List<AI> AIs = new List<AI>();                      //å„²å­˜æ‰€æœ‰AIçš„é™£åˆ—
+        List<Creature> creatures = new List<Creature>();    //å„²å­˜æ‰€æœ‰ç”Ÿç‰©çš„é™£åˆ—
 
-        Bomb PlayerBomb = new Bomb();   //«Ø¥ßª±®a¬µ¼u
-        Bomb AIBomb = new Bomb();       //«Ø¥ßAI¬µ¼u
-        Player player = new Player();   //«Ø¥ßª±®a
-        AI ai = new AI();               //«Ø¥ßAI
+        Player player = new Player();   //å»ºç«‹ç©å®¶
 
-        int Player_duration = Explosion.duration;   //ª±®aÃz¬µ«á«ùÄò®É¶¡
-        int AI_duration = Explosion.duration;       //AIÃz¬µ«á«ùÄò®É¶¡
+        int point = 0;          //åˆ†æ•¸
 
-        int Player_fuze = Bomb.fuze;    //ª±®a¬µ¼uªº¤Ş«H
-        int AI_fuze = Bomb.fuze;        //AI¬µ¼uªº¤Ş«H
+        bool start = false;     //éŠæˆ²é–‹å§‹ç‹€æ…‹(æ˜¯å¦å·²é–‹å§‹)
 
-        int point = 0;  //¤À¼Æ
-
-        bool start = false;             //¹CÀ¸¶}©lª¬ºA(¬O§_¤w¶}©l)
-
-        //Computer ENTER_GAME = new Computer();  //¹CÀ¸¶i¤J­µ¼Ö
-        Computer explode_wav = new Computer();  //¹CÀ¸¤º³¡­µ¼Ö
+        Computer explode_wav = new Computer();  //éŠæˆ²å…§éƒ¨éŸ³æ¨‚
 
         public Form1()
         {
             InitializeComponent();
         }
 
-        //¸ü¤J¦a¹Ï
-        private void Bomberman_Load(object sender, EventArgs e) 
+        private void Bomberman_Load(object sender, EventArgs e)
         {
             this.KeyPreview = true;
 
-            this.Size = new Size(1250, 830);        //³]©wµøµ¡¤j¤p
+            this.Size = new Size(1250, 830);        //è¨­å®šè¦–çª—å¤§å°
 
-            this.Controls.Add(player.boxCreature);  //·s¼Wª±®a
-            this.Controls.Add(ai.boxCreature);      //·s¼WAI
-            this.Controls.Add(PlayerBomb.boxBomb);  //·s¼Wª±®a¬µ¼u
-            this.Controls.Add(AIBomb.boxBomb);      //·s¼WAI¬µ¼u
-
-            for (int i = 0; i < 5; i++) //0¤W 1¤U 2¥ª 3¥k 4¤¤
+            //åˆå§‹åŒ–ç©å®¶
+            this.Controls.Add(player.boxCreature);  //æ–°å¢ç©å®¶
+            this.Controls.Add(player.bomb.boxBomb); //æ–°å¢ç©å®¶ç‚¸å½ˆ
+            for (int i = 0; i < 5; i++)
             {
-                Player_explosions.Add(new Explosion());                 //±Nª±®a²£¥ÍªºÃz¬µ©ñ¤J°}¦C
-                this.Controls.Add(Player_explosions[i].boxExplosion);   //·s¼Wª±®aÃz¬µ
+                this.Controls.Add(player.explosions[i].boxExplosion);   //æ–°å¢ç©å®¶çˆ†ç‚¸
+            }
 
-                AI_explosions.Add(new Explosion());                 //±NAI²£¥ÍªºÃz¬µ©ñ¤J°}¦C
-                this.Controls.Add(AI_explosions[i].boxExplosion);   //·s¼WAIÃz¬µ
+            //åˆå§‹åŒ–AI
+            AIs.Add(new AI("red"));
+            AIs.Add(new AI("green"));
+            AIs.Add(new AI("yellow"));
+
+            foreach(AI ai in AIs)
+            {
+                this.Controls.Add(ai.boxCreature);  //æ–°å¢AI  
+                this.Controls.Add(ai.bomb.boxBomb); //æ–°å¢AIç‚¸å½ˆ
+                for (int j = 0; j < 5; j++)
+                {
+                    this.Controls.Add(ai.explosions[j].boxExplosion);   //æ–°å¢AIçˆ†ç‚¸
+                }
+            }
+
+            creatures.Add(player);
+            foreach(AI ai in AIs)
+            {
+                creatures.Add(ai);
             }
 
             Init();
             LabStartup.Visible = true;
+            butLevel1.Visible = true;
+            butLevel2.Visible = true;
+            butLevel1.Enabled = true;
+            butLevel2.Enabled = true;
         }
 
-        //¹CÀ¸¶}©l
+        private void butLevel1_Click(object sender, EventArgs e)
+        {
+            StartGame();
+            MapLoader(1);   //è®€å–åœ°åœ–è³‡è¨Š(Level1.txt)
+            //å•Ÿç”¨æ‰€æœ‰Timer
+            timeMain.Start();
+            timeAI.Start();
+            timeBomb.Start();
+            timeExplosion.Start();
+        }
+
+        private void butLevel2_Click(object sender, EventArgs e)
+        {
+            StartGame();
+            MapLoader(2);   //è®€å–åœ°åœ–è³‡è¨Š(Level2.txt)
+            //å•Ÿç”¨æ‰€æœ‰Timer
+            timeMain.Start();
+            timeAI.Start();
+            timeBomb.Start();
+            timeExplosion.Start();
+        }
+
+        //éŠæˆ²é–‹å§‹
         private void StartGame()
         {
-            start = true;   //±N¹CÀ¸ª¬ºA³]¬°"¶}©l"
-            Init();         //ªì©l¤Æ
-            MapLoader(1);   //Åª¨ú¦a¹Ï¸ê°T(Level1.txt)
-            timeMain.Start();   //¶}©l"¥DTimer"
-            timeAI.Start();     //¶}©l"AITimer"
-            LabPoint.Visible = true;    //Åã¥Ü¤À¼Ælabel
+            start = true;   //å°‡éŠæˆ²ç‹€æ…‹è¨­ç‚º"é–‹å§‹"
+            Init();         //åˆå§‹åŒ–         
         }
 
-        //ªì©l¤Æ
+        //åˆå§‹åŒ–
         private void Init()
         {
-            //ÁôÂÃ©Ò¦³Label
+            //éš±è—æ‰€æœ‰Label
             LabStartup.Visible = false;
             LabGameover.Visible = false;
 
-            //ªì©l¤Æ
+            //éš±è—ä¸¦åœç”¨æ‰€æœ‰Buttons
+            butLevel1.Visible = false;
+            butLevel2.Visible = false;
+            butLevel1.Enabled = false;
+            butLevel2.Enabled = false;
+
+            //åˆå§‹åŒ–ç©å®¶
             player.BombPlaced = false;
-            ai.BombPlaced = false;
-            ai.step = Block.BlockWidth / ai.Speed;
-            point = 0;
-
-            //±Nª±®aÁôÂÃ
+            player.Explode = false;
             player.boxCreature.Visible = false;
-
-            //±NAIÁôÂÃ
-            ai.boxCreature.Visible = false;
-
-            //±Nª±®aªº¬µ¼uÁôÂÃ¨Ã²¾¦Ü¨¤¸¨
-            PlayerBomb.boxBomb.Visible = false;
-            PlayerBomb.boxBomb.Location = new Point(0, 0);
-
-            //±NAIªº¬µ¼uÁôÂÃ¨Ã²¾¦Ü¨¤¸¨
-            AIBomb.boxBomb.Visible = false;
-            AIBomb.boxBomb.Location = new Point(0, 0);
-
-
-            for (int i = 0; i < 5; i++) //0¤W 1¤U 2¥ª 3¥k 4¤¤
+            //å°‡ç©å®¶çš„ç‚¸å½ˆéš±è—ä¸¦ç§»è‡³è§’è½
+            player.bomb.boxBomb.Visible = false;
+            player.bomb.boxBomb.Location = new Point(0, 0);
+            for (int i = 0; i < 5; i++)
             {
-                //±Nª±®a²£¥ÍªºÃz¬µÁôÂÃ¨Ã²¾¦Ü¨¤¸¨
-                Player_explosions[i].boxExplosion.Visible = false;
-                Player_explosions[i].boxExplosion.Location = new Point(0, 0);
-
-                //±NAI²£¥ÍªºÃz¬µÁôÂÃ¨Ã²¾¦Ü¨¤¸¨
-                AI_explosions[i].boxExplosion.Visible = false;
-                AI_explosions[i].boxExplosion.Location = new Point(0, 0);
+                //å°‡ç©å®¶ç”¢ç”Ÿçš„çˆ†ç‚¸éš±è—ä¸¦ç§»è‡³è§’è½
+                player.explosions[i].boxExplosion.Visible = false;
+                player.explosions[i].boxExplosion.Location = new Point(0, 0);
             }
 
-            //§R°£©Ò¦³³õ´º¤è¶ô(Àğ¾À¡B¯ó¦a¡Bªd¤g)
-            foreach (PictureBox picturebox in
-                this.Controls.OfType<PictureBox>()
-                .Where(pb => !(pb.Tag == null) && (pb.Tag.ToString() == "wall" || pb.Tag.ToString() == "grass" || pb.Tag.ToString() == "dirt")))
+            //åˆå§‹åŒ–AI
+            foreach (AI ai in AIs)
             {
-                this.Controls.Remove(picturebox);
+                ai.BombPlaced = false;
+                ai.Explode = false;
+                ai.boxCreature.Visible = false; //å°‡AIéš±è—
+
+                //å°‡AIçš„ç‚¸å½ˆéš±è—ä¸¦ç§»è‡³è§’è½
+                ai.bomb.boxBomb.Visible = false;
+                ai.bomb.boxBomb.Location = new Point(0, 0);
+
+                //å°‡AIç”¢ç”Ÿçš„çˆ†ç‚¸éš±è—ä¸¦ç§»è‡³è§’è½
+                for (int i = 0; i < 5; i++)
+                {
+                    ai.explosions[i].boxExplosion.Visible = false;
+                    ai.explosions[i].boxExplosion.Location = new Point(0, 0);
+                }
             }
+
+            //åˆªé™¤æ‰€æœ‰å ´æ™¯æ–¹å¡Š(ç‰†å£ã€è‰åœ°ã€æ³¥åœŸ)
+            IEnumerable<PictureBox> pb = this.Controls.OfType<PictureBox>().Where(pb => !(pb.Tag == null) && (pb.Tag.ToString() == "wall" || pb.Tag.ToString() == "grass" || pb.Tag.ToString() == "dirt"));
+            while (pb.Count() != 0)
+            {
+                foreach (Control control in pb)
+                {
+                    this.Controls.Remove(control);
+                    control.Dispose();
+                }
+            }
+
+            point = 0;                  //é‡ç½®åˆ†æ•¸
+            LabPoint.Visible = true;    //é¡¯ç¤ºåˆ†æ•¸label
         }
 
-        //¹CÀ¸µ²§ô
+        //éŠæˆ²çµæŸ
         private void GameOver()
         {
-            start = false; //±N¹CÀ¸ª¬ºA³]¬°"¥¼¶}©l"
+            start = false; //å°‡éŠæˆ²ç‹€æ…‹è¨­ç‚º"æœªé–‹å§‹"
 
-            //°±¥Î©Ò¦³Timer
+            //åœç”¨æ‰€æœ‰Timer
             timeMain.Stop();
             timeAI.Stop();
-            timeBomb_AI.Stop();
-            timeBomb_Player.Stop();
-            timeExplosion_AI.Stop();
-            timeExplosion_Player.Stop();
+            timeBomb.Stop();
+            timeExplosion.Stop();
 
-            //±N©Ò¦³controls¼vÂÃ
-            foreach (Control control in this.Controls)  
+            //å°‡æ‰€æœ‰controlså½±è—
+            foreach (Control control in this.Controls)
             {
                 control.Visible = false;
             }
 
-            //Åã¥Ü©Ò»İlabel
+            //é¡¯ç¤ºæ‰€éœ€label
             LabPoint.Visible = true;
             LabGameover.Visible = true;
-            LabStartup.Visible = true;           
+            LabStartup.Visible = true;
+
+            //é¡¯ç¤ºä¸¦å•Ÿç”¨æ‰€æœ‰Button
+            butLevel1.Visible = true;
+            butLevel2.Visible = true;
+            butLevel1.Enabled = true;
+            butLevel2.Enabled = true;
         }
 
-        //Åª¨úÃö¥d
+        //è®€å–é—œå¡
         private void MapLoader(int level) 
         {
-            int spawnX = 0, spawnY = 0; //ªì©lª±®a¥Í¦¨®y¼Ğ
+            int spawnX = 0, spawnY = 0; //åˆå§‹ç©å®¶ç”Ÿæˆåº§æ¨™
 
             string strLevel = string.Empty;
-            switch (level)  //Ãö¥d¿ï¾Ü
+            switch (level)  //é—œå¡é¸æ“‡
             {
-                case 1: //Ãö¥d1                    
-                    spawnX = 140;    //³]©wª±®a¥Í¦¨®y¼Ğ
+                case 1: //é—œå¡1
+                    player.Speed = 7;
+                    foreach(AI ai in AIs)
+                    {
+                        ai.Speed = 10;
+                        ai.step = Block.BlockWidth / ai.Speed;
+                    }
+                    spawnX = 140;           //è¨­å®šç©å®¶ç”Ÿæˆåº§æ¨™
                     spawnY = 70;
-                    ai.Spawn(210, 280);   //¥Í¦¨¹q¸£
-                    strLevel = Properties.Resources.level1; //Åª¨ú¬Û¹ïÀ³ªº¤å¦rÀÉ
+                    AIs[0].Spawn(630, 70);  //ç”ŸæˆAI
+                    AIs[1].Spawn(70, 630);  //ç”ŸæˆAI
+                    AIs[2].Spawn(630, 630); //ç”ŸæˆAI
+                    strLevel = Properties.Resources.level1; //è®€å–ç›¸å°æ‡‰çš„æ–‡å­—æª”
                     break;
 
-                //case 2:
-                //    spawnX = 70;
-                //    spawnY = 70;
-                //    ai.Spawn(210, 280);
-                //    strLevel = Properties.Resources.level2;
-                //    break;
+                case 2:
+                    player.Speed = 5;
+                    foreach (AI ai in AIs)
+                    {
+                        ai.Speed = 14;
+                        ai.step = Block.BlockWidth / ai.Speed;
+                    }
+                    spawnX = 70;
+                    spawnY = 70;
+                    AIs[0].Spawn(630, 70);
+                    AIs[1].Spawn(70, 630);
+                    AIs[2].Spawn(630, 630);
+                    strLevel = Properties.Resources.level2;
+                    break;
+
                 default:
                     Console.Error.WriteLine("Level Selection Error!");
                     break;
             }
 
-            player.Spawn(spawnX, spawnY);   //¥Í¦¨ª±®a 
+            player.Spawn(spawnX, spawnY);   //ç”Ÿæˆç©å®¶
 
             using (StringReader reader = new StringReader(strLevel))
             {
-                int posX = 0, posY = 0; //ªì©l¤è¶ôªº¦ì¸m
-                int i = 0, j = 0;       //ªì©l¯Á¤Ş­È
+                int posX = 0, posY = 0; //åˆå§‹æ–¹å¡Šçš„ä½ç½®
+                int i = 0, j = 0;       //åˆå§‹ç´¢å¼•å€¼
 
                 string strings = string.Empty;
-                while ((strings = reader.ReadLine()) != null)    //Åª¨úlevel1¤å¦rÀÉ¤¤ªº¤å¦r
+                while ((strings = reader.ReadLine()) != null)    //è®€å–level1æ–‡å­—æª”ä¸­çš„æ–‡å­—
                 {
-                    string[] blocks = strings.Split(' ');
+                    string[] str = strings.Split(' ');
 
-                    foreach (string type in blocks)
+                    foreach (string type in str)
                     {
                         Block block = new Block();
-                        block.Spawn(type, posX, posY);      //¨CÅª¨ú¤@¦r¤¸´N«Ø¥ß¤@­Ó·sbutton(³õ´º¤è¶ô)                        
-                        this.Controls.Add(block.boxBlock);  //©ñ¸m¤è¶ô
-                        posX += Block.BlockWidth;   //¦V¥k¦ì²¾¤@­Ó¤è¶ô¼e
+                        block.Spawn(type, posX, posY);      //æ¯è®€å–ä¸€å­—å…ƒå°±å»ºç«‹ä¸€å€‹æ–°button(å ´æ™¯æ–¹å¡Š)                        
+                        this.Controls.Add(block.boxBlock);  //æ”¾ç½®æ–¹å¡Š
+                        block = null;
 
-                        if (type == "N")    //¦pªG¬°¯ó¦a¤è¶ô
+                        posX += Block.BlockWidth;   //å‘å³ä½ç§»ä¸€å€‹æ–¹å¡Šå¯¬
+
+                        if (type == "N")    //å¦‚æœç‚ºè‰åœ°æ–¹å¡Š
                         {
-                            obstacle[i, j] = 0; //µø¬°«D»ÙÃªª«
+                            obstacle[i, j] = 0; //è¦–ç‚ºééšœç¤™ç‰©
                         }
                         else
                         {
-                            obstacle[i, j] = 1; //µø¬°»ÙÃªª«
+                            obstacle[i, j] = 1; //è¦–ç‚ºéšœç¤™ç‰©
                         }
                         j++;
                     }
-                    posX = 0;                   //¦^¨ìªì©l¦ì¸m(´«¦æ)
-                    posY += Block.BlockHeight;   //¦V¤U¦ì²¾¤@­Ó¤è¶ô°ª
+                    posX = 0;                   //å›åˆ°åˆå§‹ä½ç½®(æ›è¡Œ)
+                    posY += Block.BlockHeight;   //å‘ä¸‹ä½ç§»ä¸€å€‹æ–¹å¡Šé«˜
 
                     j = 0;
                     i++;
@@ -214,37 +278,30 @@ namespace bomberman
             }
         }
 
-        //Áä½L¨Æ¥ó
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             Keys input;
             input = e.KeyCode;
 
-            //·íª±®a«ö¤UENTER¹CÀ¸¶}©l
-            if (input == Keys.Enter && start == false)
-            {
-                StartGame();
-            }
-
             if (start == true)
             {
-                player.hitbox.Left = player.boxCreature.Left;  //¥ı±Nhitbox²¾¦Üª±®a¦ì¸m
+                player.hitbox.Left = player.boxCreature.Left;  //å…ˆå°‡hitboxç§»è‡³ç©å®¶ä½ç½®
                 player.hitbox.Top = player.boxCreature.Top;
 
                 switch (input)
                 {
-                    //©ñ¬µ¼u
+                    //æ”¾ç‚¸å½ˆ
                     case Keys.Space:
                         if (!player.BombPlaced)
                         {
-                            //©ñ¸m¬µ¼u
-                            PlaceBomb(player.boxCreature.Left, player.boxCreature.Top, timeBomb_Player, "player", PlayerBomb);
+                            //æ”¾ç½®ç‚¸å½ˆ
+                            PlaceBomb(player);
                         }
                         break;
 
-                    //²¾°Ê
+                    //ç§»å‹•
                     case Keys.W:
-                        player.hitbox.Top -= player.Speed; //¥ıÅıhitbox²¾°Ê                       
+                        player.hitbox.Top -= player.Speed; //å…ˆè®“hitboxç§»å‹•                       
                         player.boxCreature.Image= Properties.Resources.player_up;
                         break;
 
@@ -267,7 +324,7 @@ namespace bomberman
                         break;
                 }
 
-                //§PÂ_hitbox¬O§_¼²¨ì"Àğ¾À"©M"¬µ¼u"©M"ªd¤g"¡A¦pªG¨S¼²¨ì«h²¾°Êª±®a¨ìhitbox¦ì¸m
+                //åˆ¤æ–·hitboxæ˜¯å¦æ’åˆ°"ç‰†å£"å’Œ"ç‚¸å½ˆ"å’Œ"æ³¥åœŸ"ï¼Œå¦‚æœæ²’æ’åˆ°å‰‡ç§»å‹•ç©å®¶åˆ°hitboxä½ç½®
                 if (!CollisionCheck(player.hitbox, "wall") && !CollisionCheck(player.hitbox, "dirt") && (!CollisionCheck(player.hitbox, "bomb") || player.OnBomb))
                 {
                     player.boxCreature.Left = player.hitbox.Left;
@@ -276,129 +333,109 @@ namespace bomberman
             }
         }
 
-        //¸I¼²ÀË´ú(§PÂ_¨âª«¬O§_­«Å|)
+        //ç¢°æ’æª¢æ¸¬(åˆ¤æ–·å…©ç‰©æ˜¯å¦é‡ç–Š)
         public bool CollisionCheck(PictureBox box, string tag)
         {
-            //¦CÁ|¥Xform¤¤©Ò¦³Tag¬°tagªº©Ò¦³Picturebox
+            //åˆ—èˆ‰å‡ºformä¸­æ‰€æœ‰Tagç‚ºtagçš„æ‰€æœ‰Picturebox
             foreach (PictureBox picturebox in
                 this.Controls.OfType<PictureBox>()
                 .Where(pb => !(pb.Tag == null) && pb.Tag.ToString() == tag))
             {
-                if (box.Bounds.IntersectsWith(picturebox.Bounds))  //§PÂ_¨âªÌ¬O§_­«Å|
+                if (box.Bounds.IntersectsWith(picturebox.Bounds))  //åˆ¤æ–·å…©è€…æ˜¯å¦é‡ç–Š
                 {
-                    return true;//¦p­«Å|«h¦^¶Çture
+                    return true;//å¦‚é‡ç–Šå‰‡å›å‚³ture
                 }
             }
-            return false;//¦pµL­«Å|«h¦^¶Çfalse
+            return false;//å¦‚ç„¡é‡ç–Šå‰‡å›å‚³false
         }
 
 
         //------------------------------Bomb Function BEGIN-------------------------------------------
 
-        //©ñ¬µ¼u
-        private void PlaceBomb(int posX, int posY, System.Windows.Forms.Timer timer, string type, Bomb bomb)
-        {           
-            switch (type)   //§PÂ_¬O½Ö©ñªº¬µ¼u
-            {
-                case "player":
-                    player.BombPlaced = true;               //³]©wª±®aª¬ºA¬°"¤w©ñ¸m¬µ¼u"
-                    player.OnBomb = true;                   //³]©wª±®aª¬ºA¬°"¦b¬µ¼u¤W"
-                    Player_duration = Explosion.duration;   //ªì©lÃz¬µ«ùÄò®É¶¡
-                    Player_fuze = Bomb.fuze;                //ªì©l¬µ¼u¤Ş«H
-                    break;
+        //æ”¾ç‚¸å½ˆ
+        private void PlaceBomb(Creature cr)
+        {
+            cr.BombPlaced = true;                   //è¨­å®šç©å®¶ç‹€æ…‹ç‚º"å·²æ”¾ç½®ç‚¸å½ˆ"
+            cr.OnBomb = true;                       //è¨­å®šç©å®¶ç‹€æ…‹ç‚º"åœ¨ç‚¸å½ˆä¸Š"
+            cr.fuze = Creature.DefaultFuze;         //é‡ç½®ç‚¸å½ˆå¼•ä¿¡
+            cr.duration = Creature.DefaultDuration; //é‡ç½®çˆ†ç‚¸æŒçºŒæ™‚é–“
 
-                case "AI":
-                    ai.BombPlaced = true;
-                    ai.OnBomb = true;
-                    AI_duration = Explosion.duration;
-                    AI_fuze = Bomb.fuze;
-                    break;
+            cr.bomb.Spawn(cr.boxCreature.Left, cr.boxCreature.Top); //ç”Ÿæˆç‚¸å½ˆ(ç§»å‹•ç‚¸å½ˆ)
 
-                default:
-                    break;
-            }
-
-            bomb.Spawn(posX, posY); //¥Í¦¨¬µ¼u(²¾°Ê¬µ¼u)
-
-            //±N¬µ¼u©Ò¦b³B³]¬°»ÙÃªª«(¬µ¼u·|¾×¸ô)
-            obstacle[bomb.bombY / Block.BlockHeight, bomb.bombX / Block.BlockWidth] = 1;
-
-            timer.Start();  //¶}©l¬µ¼uªºTimer
+            //å°‡ç‚¸å½ˆæ‰€åœ¨è™•è¨­ç‚ºéšœç¤™ç‰©(ç‚¸å½ˆæœƒæ“‹è·¯)
+            obstacle[cr.bomb.bombY / Block.BlockHeight, cr.bomb.bombX / Block.BlockWidth] = 1;
         }
 
-        //¬µ¼uÃz¬µ
-        private void Explode(List<Explosion> ex, System.Windows.Forms.Timer timer, Bomb bomb)
+        //ç‚¸å½ˆçˆ†ç‚¸
+        private void Explode(Creature cr)
         {            
-            explode_wav.Audio.Play(Properties.Resources.explode, AudioPlayMode.Background); //Ãz¬µ­µ®Ä
+            explode_wav.Audio.Play(Properties.Resources.explode, AudioPlayMode.Background); //çˆ†ç‚¸éŸ³æ•ˆ
             
-            bomb.boxBomb.Visible = false;   //ÁôÂÃ¬µ¼u
-            bomb.boxBomb.Location = new Point(0, 0); //±N¬µ¼u²¾¦Ü¨¤¸¨(Á×§K¼vÅT¹CÀ¸)
+            cr.bomb.boxBomb.Visible = false;            //éš±è—ç‚¸å½ˆ
+            cr.bomb.boxBomb.Location = new Point(0, 0); //å°‡ç‚¸å½ˆç§»è‡³è§’è½(é¿å…å½±éŸ¿éŠæˆ²)
 
-            //¥Í¦¨­Ó¤è¦ìªºÃz¬µ(0¤W 1¤U 2¥ª 3¥k 4¤¤)
-            ex[0].Spawn(bomb.bombX, bomb.bombY - Explosion.ExplosionHeight);
-            ex[1].Spawn(bomb.bombX, bomb.bombY + Explosion.ExplosionHeight);
-            ex[2].Spawn(bomb.bombX - Explosion.ExplosionWidth, bomb.bombY);
-            ex[3].Spawn(bomb.bombX + Explosion.ExplosionWidth, bomb.bombY);
-            ex[4].Spawn(bomb.bombX, bomb.bombY);
+            cr.Explode = true;  //å°‡ç‹€æ…‹è¨­ç‚º"ç‚¸å½ˆå·²çˆ†ç‚¸"
+
+            //ç”Ÿæˆå€‹æ–¹ä½çš„çˆ†ç‚¸(0ä¸Š 1ä¸‹ 2å·¦ 3å³ 4ä¸­)
+            cr.explosions[0].Spawn(cr.bomb.bombX, cr.bomb.bombY - Explosion.ExplosionHeight);
+            cr.explosions[1].Spawn(cr.bomb.bombX, cr.bomb.bombY + Explosion.ExplosionHeight);
+            cr.explosions[2].Spawn(cr.bomb.bombX - Explosion.ExplosionWidth, cr.bomb.bombY);
+            cr.explosions[3].Spawn(cr.bomb.bombX + Explosion.ExplosionWidth, cr.bomb.bombY);
+            cr.explosions[4].Spawn(cr.bomb.bombX, cr.bomb.bombY);
             for (int i = 0; i < 5; i++)
             {
-                if (!CollisionCheck(ex[i].boxExplosion, "wall")) //ÀË¬dÃz¬µ¬O§_¸I¨ìÀğ
+                if (!CollisionCheck(cr.explosions[i].boxExplosion, "wall")) //æª¢æŸ¥çˆ†ç‚¸æ˜¯å¦ç¢°åˆ°ç‰†
                 {
-                    ex[i].boxExplosion.Visible = true;  //±N¸I¨ìÀğªºÃz¬µÁôÂÃ
+                    cr.explosions[i].boxExplosion.Visible = true;  //å°‡ç¢°åˆ°ç‰†çš„çˆ†ç‚¸éš±è—
                 }
             }
 
-            //²¾°£»ÙÃªª«(¬µ¼uÃz¬µ«á´N¤£¦A¬O»ÙÃªª«)
-            obstacle[bomb.bombY / Block.BlockHeight, bomb.bombX / Block.BlockWidth] = 0;
-
-            timer.Start();  //¶}©lÃz¬µªºTimer
+            //ç§»é™¤éšœç¤™ç‰©(ç‚¸å½ˆçˆ†ç‚¸å¾Œå°±ä¸å†æ˜¯éšœç¤™ç‰©)
+            obstacle[cr.bomb.bombY / Block.BlockHeight, cr.bomb.bombX / Block.BlockWidth] = 0;
         }
 
         //------------------------------Bomb Function END-------------------------------------------
 
-        //------------------------------Timer_Tick -------------------------------------------
+        //------------------------------Timer_Tick BEGIN-------------------------------------------
 
-        //¥D­ntimer
         private void timeMain_Tick(object sender, EventArgs e)
         {
+            LabPoint.Text = "Your points : " + point;   //å°‡åˆ†æ•¸åŠ åœ¨Labelä¸Š            
 
-            LabPoint.Text = "Your points : " + point;   //±N¤À¼Æ¥[¦bLabel¤W            
-
-            if (CollisionCheck(player.boxCreature, "explosion"))    //ÀË¬dª±®a¬O§_¸I¨ìÃz¬µ
+            if (CollisionCheck(player.boxCreature, "explosion"))    //æª¢æŸ¥ç©å®¶æ˜¯å¦ç¢°åˆ°çˆ†ç‚¸
             {
-                player.Die();   //ª±®a¦º¤`
-                GameOver();     //¹CÀ¸µ²§ô
+                player.Die();   //ç©å®¶æ­»äº¡
+                GameOver();     //éŠæˆ²çµæŸ
             }
 
-            if (CollisionCheck(ai.boxCreature, "explosion"))
+            foreach(AI ai in AIs)
             {
-                ai.Die();   //AI¦º¤`
-
-                point++;    //¥[¤À
-
-                if(start == true)
+                if (CollisionCheck(ai.boxCreature, "explosion"))
                 {
-                    while (!CollisionCheck(ai.hitbox, "grass")) //·í­«¥Í¦a¤£¬°¯ó¦a®É­«·s¿ï¾Ü­«¥Í¦a
+                    ai.Die();   //AIæ­»äº¡
+
+                    point++;    //åŠ åˆ†
+
+                    if (start == true)
                     {
-                        ai.ChoosePlace();  //¿ï¾Ü­«¥Í¦a
+                        do
+                        {
+                            ai.ChoosePlace();  //é¸æ“‡é‡ç”Ÿåœ°                                                     
+                        } while (!CollisionCheck(ai.hitbox, "grass"));  //ç•¶é‡ç”Ÿåœ°ä¸ç‚ºè‰åœ°æ™‚é‡æ–°é¸æ“‡é‡ç”Ÿåœ°
+
+                        do
+                        {
+                            Random rand = new Random();
+                            ai.target = rand.Next(4);   //éš¨æ©Ÿé¸æ“‡æ”»æ“Šç›®æ¨™
+                        } while (ai.target == creatures.IndexOf(ai)); //ç•¶æ”»æ“Šç›®æ¨™ç‚ºè‡ªå·±æ™‚é‡é¸
+
+                        ai.step = Block.BlockHeight / ai.Speed;     //é‡ç½®æ­¥æ•¸
+                        ai.Spawn(ai.hitbox.Left, ai.hitbox.Top);    //ç”ŸæˆAI
                     }
+                }               
+            }          
 
-                    ai.step = Block.BlockHeight / ai.Speed;     //­«¸m¨B¼Æ
-                    ai.Spawn(ai.hitbox.Left, ai.hitbox.Top);    //¥Í¦¨AI
-                }
-            }
-
-            //ÀË¬dAI·í¤U¬O§_¦b¬µ¼u¤W(¥Î¨Ó¸Ñ¨M©ñ¸m¬µ¼u·í¤UµLªk²¾°Êªº°İÃD)
-            if (!CollisionCheck(ai.boxCreature, "bomb"))
-            {
-                ai.OnBomb = false;
-            }
-            else
-            {
-                ai.OnBomb = true;
-            }
-
-            //ÀË¬dª±®a·í¤U¬O§_¦b¬µ¼u¤W(¥Î¨Ó¸Ñ¨M©ñ¸m¬µ¼u·í¤UµLªk²¾°Êªº°İÃD)
+            //æª¢æŸ¥ç©å®¶ç•¶ä¸‹æ˜¯å¦åœ¨ç‚¸å½ˆä¸Š(ç”¨ä¾†è§£æ±ºæ”¾ç½®ç‚¸å½ˆç•¶ä¸‹ç„¡æ³•ç§»å‹•çš„å•é¡Œ)
             if (!CollisionCheck(player.boxCreature, "bomb"))
             {
                 player.OnBomb = false;
@@ -406,132 +443,105 @@ namespace bomberman
             else
             {
                 player.OnBomb = true;
-            }
+            }           
 
-            //¦CÁ|¥Xform¤¤©Ò¦³Tag¬°"dirt"ªº©Ò¦³Picturebox
+            //åˆ—èˆ‰å‡ºformä¸­æ‰€æœ‰Tagç‚º"dirt"çš„æ‰€æœ‰Picturebox
             foreach (PictureBox picturebox in
                 this.Controls.OfType<PictureBox>()
                 .Where(pb => !(pb.Tag == null) && pb.Tag.ToString() == "dirt"))
             {
-                if (CollisionCheck(picturebox, "explosion"))  //§PÂ_ªd¤g¬O§_³Q¬µ¨ì
+                if (CollisionCheck(picturebox, "explosion"))  //åˆ¤æ–·æ³¥åœŸæ˜¯å¦è¢«ç‚¸åˆ°
                 {
-                    //±N¬µ¼u®y¼ĞÂà´«¦¨¯Á¤Ş­È
+                    //å°‡ç‚¸å½ˆåº§æ¨™è½‰æ›æˆç´¢å¼•å€¼
                     int pX = picturebox.Left / Block.BlockWidth;
                     int pY = picturebox.Top / Block.BlockHeight;
 
-                    //±Nªd¤g´À´«¬°¯ó¦a
+                    //å°‡æ³¥åœŸæ›¿æ›ç‚ºè‰åœ°
                     picturebox.Image = Properties.Resources.grass;
                     picturebox.Tag = "grass";
 
-                    //²¾°£»ÙÃªª«(ªd¤g³Q¯}Ãa«á´N¤£¦A¬O»ÙÃªª«)
+                    //ç§»é™¤éšœç¤™ç‰©(æ³¥åœŸè¢«ç ´å£å¾Œå°±ä¸å†æ˜¯éšœç¤™ç‰©)
                     obstacle[pY, pX] = 0;
                 }
             }
         }
 
-        //°õ¦æÃz¬µ
-        private void timeBomb_Player_Tick(object sender, EventArgs e)
+        private void timeBomb_Tick(object sender, EventArgs e)
         {
-            Player_fuze--;
-            if (Player_fuze <= 0)
+            //ç•¶ç‚¸å½ˆå·²æ”¾ç½®
+            foreach (Creature cr in creatures)
             {
-                timeBomb_Player.Stop();
-                
-                if (start == true)
+                if (cr.BombPlaced)
                 {
-                    //°õ¦æÃz¬µ
-                    Explode(Player_explosions, timeExplosion_Player, PlayerBomb);                    
-                }
-            }
-        }
-
-        //¬µ¼uÃz¬µ
-        private void timeExplosion_Player_Tick(object sender, EventArgs e)
-        {
-            Player_duration--;
-            if (Player_duration <= 0)
-            {
-                timeExplosion_Player.Stop();
-
-                for (int i = 0; i < 5; i++)
-                {
-                    //ÁôÂÃª±®a¬µ¼u¨Ã²¾¦Ü¨¤¸¨
-                    Player_explosions[i].boxExplosion.Visible = false;
-                    Player_explosions[i].boxExplosion.Location = new Point(0, 0);
-
-                    //±Nª¬ºA³]¬°"ª±®a¤w§ë©ñ¬µ¼u"
-                    player.BombPlaced = false;
-                }
-            }
-        }
-        
-        //ai¬µ¼u
-        private void timeBomb_AI_Tick(object sender, EventArgs e)
-        {
-            AI_fuze--;
-            if (AI_fuze <= 0)
-            {
-                timeBomb_AI.Stop();
-                
-                if (start == true)
-                {
-                    //°õ¦æÃz¬µ
-                    Explode(AI_explosions, timeExplosion_AI, AIBomb);
-                }
-            }
-        }
-        //ai
-        private void timeExplosion_AI_Tick(object sender, EventArgs e)
-        {
-            AI_duration--;
-            if (AI_duration <= 0)
-            {
-                timeExplosion_AI.Stop();
-
-                for (int i = 0; i < 5; i++)
-                {
-                    //ÁôÂÃAI¬µ¼u¨Ã²¾¦Ü¨¤¸¨
-                    AI_explosions[i].boxExplosion.Visible = false;
-                    AI_explosions[i].boxExplosion.Location = new Point(0, 0);
-
-                    //±Nª¬ºA³]¬°"AI¤w§ë©ñ¬µ¼u"
-                    ai.BombPlaced = false;
-                }
-            }
-        }
-
-        //ai²¾°Ê
-        private void timeAI_Tick(object sender, EventArgs e)
-        {
-            if (ai.step == Block.BlockWidth / ai.Speed)   //·í°Ê§¹§¹¾ã¤@®æ
-            {
-                ai.step = 0;        //¨B¼ÆÂk¹s
-
-                if (!ai.BombPlaced) //§PÂ_AI¬O§_¤w©ñ¹L¬µ¼u(³õ¤W¬O§_¦s¦bAIªº¬µ¼u),Á×§K­«½Æ§ë¼u
-                {
-                    Random random = new Random();
-
-                    ai.place = random.Next(2); //ÀH¾÷¥Í¦¨¤@­Ó0~1ªº¾ã¼Æ(¥Î¥H§PÂ_AI¬O§_°õ¦æ§ë¼u°Ê§@)
-                    if (ai.place == 1)
+                    cr.fuze--;
+                    if (cr.fuze <= 0)
                     {
-                        //°õ¦æ§ë¼u
-                        PlaceBomb(ai.boxCreature.Left, ai.boxCreature.Top, timeBomb_AI, "AI", AIBomb);
+                        //åŸ·è¡Œçˆ†ç‚¸
+                        Explode(cr);
                     }
                 }
-
-                //¿ï¾Ü¤è¦V
-                ai.ChooseWay(player.boxCreature.Left, player.boxCreature.Top, obstacle);
             }
-            else
-            {
-                //«ùÄò´Â©Ò¿ï¤è¦V²¾°Ê(ª½¨ì°Ê§¹§¹¾ã¤@®æ)
-                ai.Move();               
-                ai.boxCreature.Left = ai.hitbox.Left;
-                ai.boxCreature.Top = ai.hitbox.Top;
-                ai.step++;                             
-            }                      
         }
+
+        private void timeExplosion_Tick(object sender, EventArgs e)
+        {
+            //ç•¶ç‚¸å½ˆå·²çˆ†ç‚¸
+            foreach (Creature cr in creatures)
+            {
+                if (cr.Explode)
+                {
+                    cr.duration--;
+                    if (cr.duration <= 0)
+                    {
+                        cr.BombPlaced = false;  //å°‡ç‹€æ…‹è¨­ç‚º"å·²æŠ•æ”¾ç‚¸å½ˆ"
+                        cr.Explode = false;     //å°‡ç‹€æ…‹è¨­ç‚º"æŠ•æ”¾çš„ç‚¸å½ˆå°šæœªçˆ†ç‚¸"
+
+                        for (int i = 0; i < 5; i++)
+                        {
+                            //éš±è—çˆ†ç‚¸ä¸¦ç§»è‡³è§’è½
+                            cr.explosions[i].boxExplosion.Visible = false;
+                            cr.explosions[i].boxExplosion.Location = new Point(0, 0);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void timeAI_Tick(object sender, EventArgs e)
+        {
+            foreach (AI ai in AIs)
+            {
+                if (ai.step == Block.BlockWidth / ai.Speed)   //ç•¶å‹•å®Œå®Œæ•´ä¸€æ ¼
+                {
+                    ai.step = 0;        //æ­¥æ•¸æ­¸é›¶
+
+                    if (!ai.BombPlaced) //åˆ¤æ–·AIæ˜¯å¦å·²æ”¾éç‚¸å½ˆ(å ´ä¸Šæ˜¯å¦å­˜åœ¨AIçš„ç‚¸å½ˆ),é¿å…é‡è¤‡æŠ•å½ˆ
+                    {
+                        Random rand = new Random();
+
+                        //éš¨æ©Ÿç”Ÿæˆä¸€å€‹0~9çš„æ•´æ•¸(ç”¨ä»¥è¡¨ç¤ºAIæœ‰1/10æ©Ÿç‡æœƒåŸ·è¡ŒæŠ•å½ˆå‹•ä½œ)
+                        ai.place = rand.Next(10); 
+                        if (ai.place == 1)
+                        {
+                            //åŸ·è¡ŒæŠ•å½ˆ
+                            PlaceBomb(ai);
+                        }
+                    }
+
+                    //é¸æ“‡æ–¹å‘
+                    ai.ChooseWay(creatures[ai.target].boxCreature.Left, creatures[ai.target].boxCreature.Top, obstacle);
+                }
+                else
+                {
+                    //æŒçºŒæœæ‰€é¸æ–¹å‘ç§»å‹•(ç›´åˆ°å‹•å®Œå®Œæ•´ä¸€æ ¼)
+                    ai.Move();
+                    ai.boxCreature.Left = ai.hitbox.Left;
+                    ai.boxCreature.Top = ai.hitbox.Top;
+                    ai.step++;
+                }
+            }                                  
+        }
+
         //------------------------------Timer_Tick END-------------------------------------------
     }
-
 }

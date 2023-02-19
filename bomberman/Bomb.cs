@@ -12,7 +12,6 @@ namespace bomberman
     {
         private const int BombHeight = 70, BombWidth = 70;
         public PictureBox boxBomb = new PictureBox();
-        public const int fuze = 3;      //炸彈引信
         public int bombX, bombY;        //炸彈座標
 
         public Bomb() 

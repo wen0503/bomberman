@@ -8,9 +8,9 @@ namespace bomberman
 {
     internal class Player : Creature    //玩家
     {
-        public Player() : base(Properties.Resources.player, 7)
-        { 
-            
+        public Player() : base(7)
+        {
+            this.boxCreature.Image = Properties.Resources.player;   //設定玩家圖案
         }
     }
 }
