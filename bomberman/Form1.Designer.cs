@@ -51,9 +51,9 @@
             this.LabStartup.Location = new System.Drawing.Point(207, 415);
             this.LabStartup.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.LabStartup.Name = "LabStartup";
-            this.LabStartup.Size = new System.Drawing.Size(399, 50);
+            this.LabStartup.Size = new System.Drawing.Size(366, 50);
             this.LabStartup.TabIndex = 0;
-            this.LabStartup.Text = "Press ENTER to start";
+            this.LabStartup.Text = "按 ENTER 開始遊戲";
             // 
             // timeAI
             // 

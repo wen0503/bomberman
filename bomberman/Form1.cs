@@ -41,7 +41,8 @@ namespace bomberman
             InitializeComponent();
         }
 
-        private void Bomberman_Load(object sender, EventArgs e)
+        //載入地圖
+        private void Bomberman_Load(object sender, EventArgs e) 
         {
             this.KeyPreview = true;
 
@@ -175,7 +176,7 @@ namespace bomberman
                     break;
             }
 
-            player.Spawn(spawnX, spawnY);   //生成玩家
+            player.Spawn(spawnX, spawnY);   //生成玩家 
 
             using (StringReader reader = new StringReader(strLevel))
             {
@@ -213,6 +214,7 @@ namespace bomberman
             }
         }
 
+        //鍵盤事件
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             Keys input;
@@ -354,7 +356,9 @@ namespace bomberman
 
         //------------------------------Bomb Function END-------------------------------------------
 
-        //------------------------------Timer_Tick BEGIN-------------------------------------------
+        //------------------------------Timer_Tick -------------------------------------------
+
+        //主要timer
         private void timeMain_Tick(object sender, EventArgs e)
         {
 
@@ -425,6 +429,7 @@ namespace bomberman
             }
         }
 
+        //執行爆炸
         private void timeBomb_Player_Tick(object sender, EventArgs e)
         {
             Player_fuze--;
@@ -440,6 +445,7 @@ namespace bomberman
             }
         }
 
+        //炸彈爆炸
         private void timeExplosion_Player_Tick(object sender, EventArgs e)
         {
             Player_duration--;
@@ -458,7 +464,8 @@ namespace bomberman
                 }
             }
         }
-
+        
+        //ai炸彈
         private void timeBomb_AI_Tick(object sender, EventArgs e)
         {
             AI_fuze--;
@@ -473,7 +480,7 @@ namespace bomberman
                 }
             }
         }
-
+        //ai
         private void timeExplosion_AI_Tick(object sender, EventArgs e)
         {
             AI_duration--;
@@ -493,6 +500,7 @@ namespace bomberman
             }
         }
 
+        //ai移動
         private void timeAI_Tick(object sender, EventArgs e)
         {
             if (ai.step == Block.BlockWidth / ai.Speed)   //當動完完整一格
@@ -525,4 +533,5 @@ namespace bomberman
         }
         //------------------------------Timer_Tick END-------------------------------------------
     }
+
 }

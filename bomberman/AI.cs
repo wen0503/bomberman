@@ -63,8 +63,8 @@ namespace bomberman
             Random rand = new Random();
 
             //在地圖範圍內選擇任意座標
-            int posX = rand.Next(Block.BlockWidth * 11 + 1);    
-            int posY = rand.Next(Block.BlockHeight * 11 + 1);
+            int posX = rand.Next(Block.BlockWidth * Form1.MAP_SIZE + 1);    
+            int posY = rand.Next(Block.BlockHeight * Form1.MAP_SIZE + 1);
 
             //校正重生位置(使其維持在格子內)
             posX -= posX % Block.BlockWidth;    
@@ -94,10 +94,10 @@ namespace bomberman
                 {
                     for (int j = 0; j < Form1.MAP_SIZE; j++)
                     {
-                        this.visited[i, j] = 0;
+                        this.visited[i, j] = 0; //清除已走過的點
                     }
                 }
-                this.min = INF;
+                this.min = INF;//把min改無限大
 
                 this.visited[aiY, aiX] = 1; //紀錄AI當前座標為"已走過"
 
@@ -118,7 +118,7 @@ namespace bomberman
         //DFS演算法
         private void dfs(int[,] ob, int[,] vi, int curX, int curY, int destX, int destY, int step)
         {
-            int[][] next = new int[][]
+            int[][] next = new int[][]//假設下一步
             {
                 new int[] {0, -1},  //上
                 new int[] {0, 1},   //下
@@ -143,7 +143,7 @@ namespace bomberman
 
             for (int i = 0; i < next.Length; i++) //0上 1下 2左 3右
             {
-                //移動一步
+                //計算下一步
                 tempX = curX + next[i][0];
                 tempY = curY + next[i][1];
 
