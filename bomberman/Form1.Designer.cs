@@ -1,4 +1,4 @@
-﻿namespace bomberman
+namespace bomberman
 {
     partial class Form1
     {
